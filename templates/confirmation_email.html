@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation Email</title>
+</head>
+<body>
+    <h2>Подтверждение заказа</h2>
+    <p>Ваш заказ успешно подтвержден. Спасибо за покупку!</p>
+    <p>Номер заказа: {{ order.order_id }}</p>
+    <p>Заказ будет доставлен по адресу: {{ order.country }},
+        г. {{ order.city }}, ул. {{ order.street }}, д. {{ order.house }}, кв. {{ order.room }}</body>
+</html>

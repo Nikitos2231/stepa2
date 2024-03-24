@@ -1,0 +1,280 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<header class="header">
+    <nav class="navigation">
+        <div class="info-block d-flex align-items-center flex-row">
+            <div class="logo-block"><a href="/" class="logo-link"></a></div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">О магазине</a>
+                <a href="#" class="footer-link">Контакты</a>
+            </div>
+        </div>
+        <div class="links-div d-flex">
+            <div class="d-flex align-items-center icon-block">
+                <i class="header-basket-icon header-auth"></i>
+                {% if user.is_authenticated %}
+                    <a class="nav-links" href="/basket/">Корзина</a>
+                {% else %}
+                    <a class="nav-links" href="/accounts/login">Корзина</a>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center icon-block">
+                {% if user.is_authenticated %}
+                    <i class="header-lk-icon header-auth"></i>
+                    <a class="nav-links" href="/profile">Личный кабинет</a>
+                {% else %}
+                    <i class="header-auth-icon header-auth"></i>
+                    <a class="nav-links" href="/accounts/login">Вход / Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section>
+        <div class="container">
+            <h2>Персональный раздел</h2>
+            <div class="row justify-content-around">
+                <div class="col-md-3 bg-light p-3 profile-border">
+                    <ul class="list-unstyled m-0">
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-custom" href="#block-1">Личные данные</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link nav-link-custom" href="#block-2">Мои заказы</a>
+                        </li>
+                        <li class="nav-item logout-item">
+                            <form action="/accounts/logout/" method="post">
+                                {% csrf_token %}
+                                <button class="btn btn-link logout-button" type="submit">Выход</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-8 bg-light p-3 profile-border" id="block-1">
+                    <form method="post" class="d-flex justify-content-center flex-column" id="user-update-form">
+                        {% csrf_token %}
+                        <h3 class="mb-3">Персональная информация</h3>
+                        <div class="person-info-block d-flex flex-row justify-content-around">
+                            <div class="col-5">
+                                <label for="id_first_name" class="form-label"><strong>Имя</strong></label>
+                                <input id="id_first_name" class="form-control me-2 form-control-custom"
+                                       name="first_name" type="text"
+                                       value="{{ user.first_name }}"
+                                       placeholder="Имя"
+                                       aria-label="Имя" required maxlength="128">
+                            </div>
+                            <div class="col-5">
+                                <label for="id_last_name" class="form-label"><strong>Фамилия</strong></label>
+                                <input id="id_last_name" class="form-control me-2 form-control-custom"
+                                       name="last_name" type="text"
+                                       value="{{ user.last_name }}"
+                                       placeholder="Фамилия"
+                                       aria-label="Фамилия" required maxlength="128">
+                            </div>
+                        </div>
+                        <h3 class="mb-3">Контактные данные</h3>
+                        <div class="contact-info-block d-flex flex-row justify-content-around">
+                            <div class="col-5">
+                                <label for="id_email" class="form-label"><strong>Электронная почта</strong></label>
+                                <input id="id_email" class="form-control me-2 form-control-custom"
+                                       name="email" type="email"
+                                       value="{{ user.email }}"
+                                       placeholder="Электронная почта"
+                                       aria-label="Электронная почта" required maxlength="128">
+                            </div>
+                            <div class="col-5">
+                                <label for="phone" class="form-label"><strong>Номер телефона</strong></label>
+                                <input id="phone" class="form-control me-2 form-control-custom"
+                                       name="phone" type="tel"
+                                        {% if user.phone %} value="{{ user.phone }}"{% else %} value="+7"{% endif %}
+                                       placeholder="Номер телефона"
+                                       aria-label="Номер телефона" maxlength="12" minlength="12"
+                                       pattern="\+7\d{3}\d{3}\d{2}\d{2}"
+                                       title="Формат номера телефона должен быть +7 (XXX) XXX-XX-XX"
+                                        {% if basket.status == 'RESERVED' %} disabled {% endif %}>
+                            </div>
+                        </div>
+                        <h3>Адрес доставки</h3>
+                        <div class="address-info-block d-flex flex-row justify-content-around flex-wrap">
+                            <div class="col-5 mb-3">
+                                <label for="id_country" class="form-label"><strong>Страна</strong></label>
+                                <input id="id_country" class="form-control me-2 form-control-custom"
+                                       name="country" type="text"
+                                       value="{{ user.country }}"
+                                       placeholder="Страна"
+                                       aria-label="Страна" maxlength="128">
+                            </div>
+                            <div class="col-5 mb-3">
+                                <label for="city" class="form-label"><strong>Город</strong></label>
+                                <input id="city" class="form-control me-2 form-control-custom"
+                                       name="city" type="text"
+                                       value="{{ user.city }}"
+                                       placeholder="Город"
+                                       aria-label="Город" maxlength="128">
+                            </div>
+                            <div class="col-5 mb-3">
+                                <label for="street" class="form-label"><strong>Улица</strong></label>
+                                <input id="street" class="form-control me-2 form-control-custom"
+                                       name="street" type="text"
+                                       value="{{ user.street }}"
+                                       placeholder="Улица"
+                                       aria-label="Улица" maxlength="128">
+                            </div>
+                            <div class="col-5 mb-3">
+                                <label for="house" class="form-label"><strong>Дом</strong></label>
+                                <input id="house" class="form-control me-2 form-control-custom"
+                                       name="house" type="text"
+                                       value="{{ user.house }}"
+                                       placeholder="Дом"
+                                       aria-label="Дом" maxlength="128">
+                            </div>
+                            <div class="col-5">
+                                <label for="room" class="form-label"><strong>Квартира</strong></label>
+                                <input id="room" class="form-control me-2 form-control-custom"
+                                       name="room" type="text" pattern="[0-9]*" title="Введите только цифры"
+                                       value="{{ user.room }}"
+                                       placeholder="Квартира"
+                                       aria-label="Квартира" maxlength="128">
+                            </div>
+                            <div class="col-5">
+
+                            </div>
+                        </div>
+
+                        <h3>Платежная карта</h3>
+                        <div class="card-info-block d-flex flex-row justify-content-around flex-wrap mb-4">
+                            <div class="col-5 mb-3">
+                                <label for="card_number" class="form-label"><strong>Номер карты</strong></label>
+                                <input id="card_number" class="form-control me-2 form-control-custom"
+                                       name="card_number" type="text"
+                                        {% if user.card_number %} value="{{ user.card_number }}"{% endif %}
+                                       placeholder="Номер карты" pattern="[0-9]*" title="Введите только цифры"
+                                       aria-label="Номер карты" maxlength="16" minlength="16">
+                            </div>
+                            <div class="col-5 mb-3">
+                                <label for="card_date" class="form-label"><strong>Срок действия до</strong></label>
+                                <input id="card_date" class="form-control me-2 form-control-custom" name="card_date"
+                                       type="month"
+                                       value="{{ user.card_date }}"
+                                       placeholder="Срок действия до" aria-label="Срок действия до"
+                                       min="2022-01" max="2050-12">
+                            </div>
+                            <div class="col-5">
+                                <label for="card_cvv" class="form-label"><strong>CVV код</strong></label>
+                                <input id="card_cvv" class="form-control me-2 form-control-custom"
+                                       name="card_cvv" type="password"
+                                        {% if user.card_cvv %} value="{{ user.card_cvv }}"{% endif %}
+                                       placeholder="CVV код" pattern="[0-9]*" title="Введите только цифры"
+                                       aria-label="CVV код" maxlength="3" minlength="3">
+                            </div>
+                            <div class="col-5">
+
+                            </div>
+                        </div>
+                        {% if messages %}
+                            <div class="alert alert-danger">
+                                {% for message in messages %}
+                                    <span>{{ message }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <input class="btn basket-button px-5" type="submit" value="Сохранить">
+                    </form>
+                </div>
+
+                <div style="display: none" class="col-md-8 bg-light p-3 profile-border" id="block-2">
+                    <h3 class="mb-3">Заказы</h3>
+                    {% if orders|length == 0 %}
+                        <h5>Заказов пока нет</h5>
+                    {% else %}
+                        <ul>
+                            {% for order in orders %}
+                                <li>
+                                    <a href="{% url 'order_detail' order_id=order.order_id %}" style="color: inherit">
+                                        <div class="row card-custom justify-content-around">
+                                            <div class="col-auto">
+                                                <span>#{{ order.order_id }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span>заказ от {{ order.nature_date }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span>{{ order.basket.items.count }} {{ order.num_items_text }}</span>
+                                            </div>
+                                            <div class="col-auto">
+                                                <span>на сумму {{ order.total_price }} руб.</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const links = document.querySelectorAll('.nav-link');
+
+        links.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                const target = this.getAttribute('href');
+
+                document.querySelectorAll('#block-1, #block-2').forEach(function (block) {
+                    block.style.display = 'none';
+                });
+
+                document.querySelector(target).style.display = 'block';
+            });
+        });
+    });
+</script>
+
+<script>
+    // Получаем форму
+    var form = document.getElementById('user-update-form');
+    // Находим поле ввода для даты
+    var cardDateInput = document.getElementById('card_date');
+    // Добавляем обработчик события для отправки формы
+    form.addEventListener('submit', function (event) {
+        // Проверяем, что значение поля card_date установлено
+        if (cardDateInput.value) {
+            // Преобразуем значение поля в правильный формат "YYYY-MM-DD"
+            var selectedDate = new Date(cardDateInput.value);
+            var formattedDate = selectedDate.getFullYear() + '-' + ('0' + (selectedDate.getMonth() + 1)).slice(-2);
+            // Заменяем значение поля на правильный формат
+            cardDateInput.value = formattedDate;
+        }
+    });
+</script>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</html>

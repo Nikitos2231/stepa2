@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<main>
+    <header class="header">
+        <nav class="navigation">
+            <div class="info-block d-flex align-items-center flex-row">
+                <div class="logo-block"><a href="/" class="logo-link"></a></div>
+                <div class="footer-links">
+                    <a href="#" class="footer-link">О магазине</a>
+                    <a href="#" class="footer-link">Контакты</a>
+                </div>
+            </div>
+            <div class="links-div d-flex">
+                <div class="d-flex align-items-center icon-block">
+                    <i class="header-basket-icon header-auth"></i>
+                    {% if user.is_authenticated %}
+                        <a class="nav-links" href="/basket/">Корзина</a>
+                    {% else %}
+                        <a class="nav-links" href="/accounts/login">Корзина</a>
+                    {% endif %}
+                </div>
+                <div class="d-flex align-items-center icon-block">
+                    {% if user.is_authenticated %}
+                        <i class="header-lk-icon header-auth"></i>
+                        <a class="nav-links" href="/profile">Личный кабинет</a>
+                    {% else %}
+                        <i class="header-auth-icon header-auth"></i>
+                        <a class="nav-links" href="/accounts/login">Вход / Регистрация</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <h1 class="h1-search">Поиск по товарам</h1>
+                <div class="col-md-6">
+                    <form id="search-form" method="GET">
+                        <div class="d-flex">
+                            <input class="form-control me-2 form-control-custom" name="q" type="search"
+                                   placeholder="Название товара"
+                                   aria-label="Название товара"
+                                   value="{{ initial_search_query|default_if_none:'' }}">
+                            <button class="btn btn-outline-success-custom" type="submit">Поиск</button>
+                        </div>
+
+                        <button class="btn btn-outline-success-custom toggle-btn mt-3" type="button">
+                            <span class="text">Показать/скрыть фильтры</span>
+                            <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                        </button>
+
+                        <div class="toggle-div">
+
+                            <div class="mt-4">
+                                <h4 class="h2-filters">Фильтры</h4>
+                                <div class="row align-items-end">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="minPrice" class="form-label">Мин. цена</label>
+                                        <input class="form-control form-control-custom form-control-custom-price"
+                                               name="minPrice" type="number" placeholder="Мин. цена"
+                                               aria-label="Мин. цена"
+                                               value="{{ initial_min_price|default_if_none:'' }}">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="maxPrice" class="form-label">Макс. цена</label>
+                                        <input class="form-control form-control-custom form-control-custom-price"
+                                               name="maxPrice" type="number" placeholder="Макс. цена"
+                                               aria-label="Макс. цена"
+                                               value="{{ initial_max_price|default_if_none:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <p>Kатегории товаров:</p>
+                                <div class="category-checkbox">
+                                    <input class="form-check-input category-checkbox" type="checkbox" name="categories"
+                                           id="category1" value="cat" {% if 'cat' in initial_categories %}
+                                           checked {% endif %}>
+                                    <label class="form-check-label" for="category1">
+                                        Кошкам
+                                    </label>
+                                </div>
+                                <div class="category-checkbox">
+                                    <input class="form-check-input category-checkbox" type="checkbox" name="categories"
+                                           id="category2" value="dog" {% if 'dog' in initial_categories %}
+                                           checked {% endif %}>
+                                    <label class="form-check-label" for="category2">
+                                        Собакам
+                                    </label>
+                                </div>
+                                <div class="category-checkbox">
+                                    <input class="form-check-input category-checkbox" type="checkbox" name="categories"
+                                           id="category3" value="parrot" {% if 'parrot' in initial_categories %}
+                                           checked {% endif %}>
+                                    <label class="form-check-label" for="category3">
+                                        Попугаям
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-auto mt-3">
+                                <button class="btn btn-outline-success-custom w-100" type="submit">Применить
+                                    фильтры
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+
+                    {% if search_query %}
+                        <p class="search-result-text my-3">Результаты поиска по: "{{ search_query }}" <a href="/">сбросить</a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            {% if list_of_all_orders|length == 0 %}
+                <h4>Товаров не найдено</h4>
+            {% endif %}
+            <div class="row">
+                {% for order in list_of_all_orders %}
+                    <div class="col-md-3">
+                    {% if order.quantity == 0 %}
+                        <div class="card card-opacity">
+                    {% else %}
+                        <div class="card">
+                    {% endif %}
+                <a href="{% url 'product_detail' product_id=order.order_id %}">
+                    <img src="{{ order.image }}" alt="Product Image">
+                    <h3 class="product-name">{{ order.product }}</h3>
+                    <p class="product-description">{{ order.product_description }}</p>
+                    <div class="d-flex align-items-center justify-content-around">
+                        <p class="m-0"><strong>{{ order.price }} руб.</strong></p>
+                        {% if user.is_anonymous %}
+                            <a href="/accounts/login/" class="btn-basket-custom ml-2 cart-icon"><i
+                                    class="fas fa-shopping-cart"></i></a>
+                        {% elif order.order_id in basket_items %}
+                            <form method="post" action="/remove-item/">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ order.order_id }}">
+                                <button type="submit" class="btn-basket-custom ml-2 cart-icon"
+                                        {% if basket.status == 'RESERVED' %} disabled {% endif %}><i
+                                        class="fas fa-trash"></i></button>
+                            </form>
+                        {% elif order.quantity == 0 %}
+                            <button type="submit" disabled class="btn-basket-custom ml-2 cart-icon"><i
+                                    class="fas fa-shopping-cart"></i></button>
+                        {% else %}
+                            <form method="post" action="/add-to-basket/">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ order.order_id }}">
+                                <button type="submit" class="btn-basket-custom ml-2 cart-icon"
+                                        {% if basket.status == 'RESERVED' %} disabled {% endif %}><i
+                                        class="fas fa-shopping-cart"></i></button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </a>
+                </div>
+                </div>
+                {% endfor %}
+                </div>
+            </div>
+    </section>
+</main>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+    $(document).ready(function () {
+        var isPanelOpen = localStorage.getItem('isPanelOpen');
+
+        if (isPanelOpen === 'true') {
+            $('.toggle-div').show();
+        }
+
+        $('.toggle-btn').click(function () {
+            $('.toggle-div').slideToggle(function () {
+                localStorage.setItem('isPanelOpen', $(this).is(':visible'));
+            });
+        });
+    });
+</script>
+</body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</html>
