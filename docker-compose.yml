@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:latest
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: root
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    ports:
+      - "3310:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    networks:
+      - web-app-network
+
+  web:
+    build: .
+    container_name: django_container
+    command: sh -c "sleep 20 & python manage.py runserver 0.0.0.0:8000 & celery -A djangoProject7 worker --loglevel=info"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - web-app-network
+
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    container_name: rabbitmq_container
+    restart: always
+    ports:
+      - "5673:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - web-app-network
+
+networks:
+  web-app-network:

@@ -1,0 +1,175 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Basket</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<header class="header">
+    <nav class="navigation">
+        <div class="info-block d-flex align-items-center flex-row">
+            <div class="logo-block"><a href="/" class="logo-link"></a></div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">О магазине</a>
+                <a href="#" class="footer-link">Контакты</a>
+            </div>
+        </div>
+        <div class="links-div d-flex">
+            <div class="d-flex align-items-center icon-block">
+                <i class="header-basket-icon header-auth"></i>
+                {% if user.is_authenticated %}
+                    <a class="nav-links" href="/basket/">Корзина</a>
+                {% else %}
+                    <a class="nav-links" href="/accounts/login">Корзина</a>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center icon-block">
+                {% if user.is_authenticated %}
+                    <i class="header-lk-icon header-auth"></i>
+                    <a class="nav-links" href="/profile">Личный кабинет</a>
+                {% else %}
+                    <i class="header-auth-icon header-auth"></i>
+                    <a class="nav-links" href="/accounts/login">Вход / Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section>
+        <div class="container">
+            {% if basket_items|length == 0 %}
+                <h2>Моя корзина</h2>
+                <h4 class="m-0 mt-5">Корзина пуста</h4>
+            {% else %}
+                <h2 class="mb-4">Моя корзина</h2>
+                <div class="basket-nav">
+                    <ul class="ul-basket-nav list-unstyled d-flex flex-row">
+                        <li class="li-basket-nav">
+                            <span class="nav-icon">1</span>
+                            <a href="/basket/" class="a-basket-nav active">Корзина</a>
+                        </li>
+                        <li class="li-basket-nav">
+                            <span class="nav-icon">2</span>
+                            <span class="a-basket-nav">Доставка</span>
+                        </li>
+                        <li class="li-basket-nav">
+                            <span class="nav-icon">3</span>
+                            <span class="a-basket-nav">Оплата</span>
+                        </li>
+                        <li class="li-basket-nav">
+                            <span class="nav-icon">4</span>
+                            <span class="a-basket-nav">Спасибо!</span>
+                        </li>
+                    </ul>
+                </div>
+                {% for item in basket_items %}
+                    <div class="row align-items-center card-custom">
+                        <div class="col-md-2">
+                            <a href="{% url 'product_detail' product_id=item.goods.order_id %}">
+                                <img class="product-image" src="{{ item.goods.image.url }}" alt="Product Image">
+                            </a>
+                        </div>
+                        <div class="col-md-5">
+                            <span>{{ item.goods.product }}. {{ item.goods.product_description }} </span>
+                        </div>
+                        <div class="col-md-2 d-flex flex-row justify-content-around align-items-center">
+                            <form method="post" action="{% url 'basket' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="add">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-basket btn-plus"
+                                        {% if basket.status == 'RESERVED' %} disabled {% endif %}>+
+                                </button>
+                            </form>
+
+                            <span>{{ item.quantity }}</span>
+
+                            <form method="post" action="{% url 'basket' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <button type="submit" class="btn btn-basket btn-minus"
+                                        {% if basket.status == 'RESERVED' %} disabled {% endif %}>-
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-2">
+                            <span>{{ item.total_price }} р./{{ item.quantity }} шт</span>
+                        </div>
+                        <div class="col-md-1">
+                            <form method="post" action="{% url 'basket' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="item_id" value="{{ item.id }}">
+                                <button type="submit" {% if basket.status == 'RESERVED' %} disabled {% endif %}>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% if messages and basket.status != 'RESERVED' %}
+                    <ul class="messages list-unstyled">
+                        {% for message in messages %}
+                            <li{% if message.tags %} class="{{ message.tags }} alert alert-danger"
+                                                     style="color: red" {% endif %}>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                {% if basket.status == 'RESERVED' %}
+                    <div class="d-flex flex-row align-items-center justify-content-around">
+                        <h4 class="m-0">Товары в корзине зарезервированы, для того, чтобы изменять корзину - снимите резерв</h4>
+                        <form method="post" action="{% url 'basket' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reset-reserve">
+                            <button type="submit" class="btn basket-button">Снять резерв<i
+                                    class="fas fa-shopping-basket"></i>
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+                <div class="row align-items-center my-5 justify-content-between">
+                    <div class="col-md-auto d-flex flex-row">
+                        <div class="col-md-auto mx-4">
+                            <h2 class="m-0">
+                                Итого: {{ total_basket_price }} Руб.
+                            </h2>
+                        </div>
+                        <div class="col-md-auto">
+                            <form method="post" action="{% url 'basket' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="clear">
+                                <button type="submit" class="btn bg-secondary"
+                                        {% if basket.status == 'RESERVED' %} disabled {% endif %}>Очистить корзину <i
+                                        class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <a href="/order-address/" class="btn basket-button">{% if basket.status != 'RESERVED' %} Начать
+                            оформление {% else %} Продолжить оформление {% endif %}</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+</main>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</html>

@@ -1,0 +1,174 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Order payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<header class="header">
+    <nav class="navigation">
+        <div class="info-block d-flex align-items-center flex-row">
+            <div class="logo-block"><a href="/" class="logo-link"></a></div>
+            <div class="footer-links">
+                <a href="#" class="footer-link">О магазине</a>
+                <a href="#" class="footer-link">Контакты</a>
+            </div>
+        </div>
+        <div class="links-div d-flex">
+            <div class="d-flex align-items-center icon-block">
+                <i class="header-basket-icon header-auth"></i>
+                {% if user.is_authenticated %}
+                    <a class="nav-links" href="/basket/">Корзина</a>
+                {% else %}
+                    <a class="nav-links" href="/accounts/login">Корзина</a>
+                {% endif %}
+            </div>
+            <div class="d-flex align-items-center icon-block">
+                {% if user.is_authenticated %}
+                    <i class="header-lk-icon header-auth"></i>
+                    <a class="nav-links" href="/profile">Личный кабинет</a>
+                {% else %}
+                    <i class="header-auth-icon header-auth"></i>
+                    <a class="nav-links" href="/accounts/login">Вход / Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <section>
+        <div class="container">
+            <h2 class="mb-4">Моя корзина</h2>
+            <div class="basket-nav">
+                <ul class="ul-basket-nav list-unstyled d-flex flex-row">
+                    <li class="li-basket-nav">
+                        <span class="nav-icon">1</span>
+                        <a href="/basket/" class="a-basket-nav active">Корзина</a>
+                    </li>
+                    <li class="li-basket-nav">
+                        <span class="nav-icon">2</span>
+                        <a href="/order-address/" class="a-basket-nav active">Доставка</a>
+                    </li>
+                    <li class="li-basket-nav">
+                        <span class="nav-icon">3</span>
+                        <a href="/order-payment/" class="a-basket-nav active">Оплата</a>
+                    </li>
+                    <li class="li-basket-nav">
+                        <span class="nav-icon">4</span>
+                        <span class="a-basket-nav">Спасибо!</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <form method="post" class="d-flex justify-content-center flex-column align-items-center"
+                  id="user-update-form">
+                {% csrf_token %}
+                <div class="main-block" style="width: 100%;">
+                    <h3>Платежная карта</h3>
+                    <div class="card-info-block d-flex flex-row justify-content-around flex-wrap mb-4">
+                        <div class="col-5 mb-3">
+                            <label for="card_number" class="form-label"><strong>Номер карты</strong></label>
+                            <input id="card_number" class="form-control me-2 form-control-custom"
+                                   name="card_number" type="text"
+                                    {% if user.card_number %} value="{{ user.card_number }}"{% endif %}
+                                   placeholder="Номер карты" pattern="[0-9]*" title="Введите только цифры"
+                                   aria-label="Номер карты" maxlength="16" minlength="16" required
+                                    {% if basket.status == 'RESERVED' %} disabled {% endif %}>
+                        </div>
+                        <div class="col-5 mb-3">
+                            <label for="card_date" class="form-label"><strong>Срок действия до</strong></label>
+                            <input id="card_date" class="form-control me-2 form-control-custom" name="card_date"
+                                   type="month"
+                                   value="{{ user.card_date }}"
+                                   placeholder="Срок действия до" aria-label="Срок действия до"
+                                   min="2022-01" max="2050-12" required
+                                    {% if basket.status == 'RESERVED' %} disabled {% endif %}>
+                        </div>
+                        <div class="col-5">
+                            <label for="card_cvv" class="form-label"><strong>CVV код</strong></label>
+                            <input id="card_cvv" class="form-control me-2 form-control-custom"
+                                   name="card_cvv" type="password"
+                                    {% if user.card_cvv %} value="{{ user.card_cvv }}"{% endif %}
+                                   placeholder="CVV код" pattern="[0-9]*" title="Введите только цифры"
+                                   aria-label="CVV код" maxlength="3" minlength="3" required
+                                    {% if basket.status == 'RESERVED' %} disabled {% endif %}>
+                        </div>
+                        <div class="col-5">
+
+                        </div>
+                    </div>
+                    <h3>Номер телефона</h3>
+                    <div class="card-info-block d-flex flex-row justify-content-around flex-wrap mb-4">
+                        <div class="col-5 mb-3">
+                            <label for="phone" class="form-label"><strong>Номер карты</strong></label>
+                            <input id="phone" class="form-control me-2 form-control-custom"
+                                   name="phone" type="tel"
+                                    {% if user.phone %} value="{{ user.phone }}"{% else %} value="+7"{% endif %}
+                                   placeholder="Номер телефона"
+                                   aria-label="Номер телефона" maxlength="12" minlength="12" required
+                                   pattern="\+7\d{3}\d{3}\d{2}\d{2}"
+                                   title="Формат номера телефона должен быть +7 (XXX) XXX-XX-XX"
+                                    {% if basket.status == 'RESERVED' %} disabled {% endif %}>
+                        </div>
+                        <div class="col-5">
+
+                        </div>
+                    </div>
+                </div>
+
+                {% if basket.status != 'RESERVED' %}
+                    <input class="btn basket-button px-5 col-4 text-center" type="submit" value="Отправить код">
+                {% endif %}
+            </form>
+            {% if basket.status == 'RESERVED' %}
+                <form method="post" action="{% url 'order_payment' %}" class="d-flex flex-row mb-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change-data">
+                    <div class="col-4 d-flex align-items-end">
+                        <input class="btn basket-button text-center" type="submit" value="Изменить данные">
+                    </div>
+                </form>
+                <h4 class="mb-4">На ваш номер телефона был выслан код подтверждения</h4>
+                <form method="post" action="{% url 'order_payment' %}" class="d-flex flex-row">
+                    {% csrf_token %}
+                    <div class="col-3">
+                        <label for="otp">Код подтверждения</label>
+                        <input type="hidden" name="action" value="check-otp">
+                        <input id="otp" name="otp" type="text" class="form-control me-2 form-control-custom" required
+                               minlength="6"
+                               maxlength="6">
+                    </div>
+                    <div class="col-4 d-flex align-items-end mx-3">
+                        <input class="btn basket-button text-center" type="submit" value="Подтвердить">
+                    </div>
+                </form>
+            {% endif %}
+            {% if messages %}
+                <ul class="messages list-unstyled mt-4">
+                    {% for message in messages %}
+                        {% if 'invalid-confirmation-code' in message.tags %}
+                            <li class="alert alert-danger" style="color: red">{{ message }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+</body>
+</html>
