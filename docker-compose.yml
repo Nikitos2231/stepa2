@@ -5,6 +5,7 @@ services:
     image: mysql:latest
     container_name: mysql_container
     restart: always
+    command: --lower_case_table_names=0
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: root
@@ -14,9 +15,9 @@ services:
       - "3310:3306"
     volumes:
       - ./mysql_data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf
     networks:
       - web-app-network
-    command: --lower_case_table_names=2
 
   web:
     build: .
