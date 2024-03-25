@@ -16,6 +16,7 @@ services:
       - ./mysql_data:/var/lib/mysql
     networks:
       - web-app-network
+    command: --lower_case_table_names=2
 
   web:
     build: .
